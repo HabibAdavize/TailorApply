@@ -1,11 +1,11 @@
-"use Client"
+'use client'
 
 import { useState } from 'react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../utils/firebase';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 
-export default function Login() {
+export default function Login( ) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
