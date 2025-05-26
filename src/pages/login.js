@@ -1,23 +1,43 @@
-'use client'
+"use client";
 
-import { useState } from 'react';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../utils/firebase';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from "react";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../utils/firebase";
+import { useRouter } from "next/navigation";
+import Link from 'next/link';
+import { useAuth } from "../context/AuthContext";
 
-export default function Login( ) {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+export default function Login() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { user } = useAuth();
 
-  const handleSubmit = async (e) => {  
-    e.preventDefault();
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
+  useEffect(() => {
+    if (user) {
+      console.log('Login: User is authenticated, redirecting to dashboard');
       router.push('/dashboard');
-    } catch (err) {
-      setError(err.message);
+    }
+  }, [user, router]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+    
+    try {
+      console.log('Login: Attempting to sign in with:', email);
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      console.log('Login: Sign in successful:', userCredential.user.uid);
+      
+      // Don't redirect here - let the useEffect handle it
+    } catch (error) {
+      console.error('Login: Error signing in:', error);
+      setError(error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -48,6 +68,12 @@ export default function Login( ) {
         >
           Sign In
         </button>
+        <p className="mt-4 text-center">
+          Don't have an account?{" "}
+          <Link href="/signup" className="text-blue-500 hover:underline">
+            Sign up here
+          </Link>
+        </p>
       </form>
     </div>
   );
